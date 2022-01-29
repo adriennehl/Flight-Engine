@@ -5,6 +5,7 @@ import { env } from './env';
 import { logger } from './logger';
 import { flights } from './api/flights';
 import { airportRouter } from './api/airports';
+import { seats } from './api/seats';
 
 const port = env.port || '4000';
 
@@ -20,6 +21,8 @@ app.get('/', (_: express.Request, res: express.Response) => {
 app.use('/flights', flights);
 
 app.use('/airports', airportRouter);
+
+app.use('/seats', seats);
 
 app.listen(port, () => {
   logger.notice(`🚀 Listening at http://localhost:${port}`);
