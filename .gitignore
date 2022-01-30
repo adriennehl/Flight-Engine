@@ -70,3 +70,4 @@ typings/
 .vscode
 src/travel-buddy-7df44-firebase-adminsdk-daz2j-9d4c3116d6.json
 src/firebase.ts
+.env
