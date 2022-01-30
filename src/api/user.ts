@@ -6,8 +6,8 @@ export const user = Router();
 
 user.get('/add', (req, res) => {
   const { query } = req;
-  if (!query || !query.username ) {
-    res.status(400).send(`'username' is a required parameter`);
+  if (!query || !query.user) {
+    res.status(400).send(`'user' is a required parameter`);
     return;
   }
   if (!query || !query.name ) {
@@ -27,8 +27,8 @@ user.get('/add', (req, res) => {
     return;
   }
 
-  const {username} = query;
-  set(ref(db, `users/${  username}`), {
+  const {user} = query;
+  set(ref(db, `users/${  user}`), {
       name: query.name,
       age: query.age,
       gender: query.gender,
@@ -39,8 +39,8 @@ user.get('/add', (req, res) => {
 
 user.get('/addFlight', (req, res) => {
   const { query } = req;
-  if (!query || !query.username ) {
-    res.status(400).send(`'username' is a required parameter`);
+  if (!query || !query.user ) {
+    res.status(400).send(`'user' is a required parameter`);
     return;
   }
   if (!query || !query.flight ) {
@@ -48,11 +48,28 @@ user.get('/addFlight', (req, res) => {
     return;
   }
 
-  const {username, flight} = query;
-  set(ref(db, `users/${username}/flights/${flight}`), {
+  const {user, flight} = query;
+  set(ref(db, `users/${user}/flights/${flight}`), {
       match:"None"
   });
   res.json({message: "Flight Added Successfully"});
+});
+
+user.get('/setPrefs', (req, res) => {
+  const { query } = req;
+  if (!query || !query.user) {
+    res.status(400).send(`'user' is a required parameter`);
+    return;
+  }
+
+  const {user} = query;
+  set(ref(db, `users/${user}/prefs`), {
+    ageRanges: query.ageRanges,
+    gender:query.gender,
+    numPeople: query.numPeople,
+    destPlans: query.destPlans
+  });
+  res.json({message: "Preferences Added Successfully"});
 });
 
 user.get('/match', (req, res) => {
@@ -70,7 +87,6 @@ user.get('/match', (req, res) => {
       return;
     }
     const user = users[u];
-
 
     // res.json({match: match});
   }).catch((error) => {console.error(error)});
