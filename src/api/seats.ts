@@ -10,47 +10,54 @@ seats.get('/', (req, res) => {
     res.status(400).send(`'flightNumber' is a required parameter`);
     return;
   }
-
-  const {flightNumber} = query;
+  
   res.json(generatedSeats);
 });
 
 seats.get('/rec', (req, res) => {
   const { query } = req;
-  if (!query || !query.user1 || !query.user2) {
+  if (!query || (!query.user1 || typeof query.user1 != "string") || (!query.user2 || typeof query.user2 != "string")) {
     res.status(400).send(`Two users required`);
     return;
   }
-
-  let user1:{priceRange:string[]}, user2:{priceRange:string[]};
+  const u1 = query.user1;
+  const u2 = query.user2;
+  
   get(child(ref(db), `users`)).then((snapshot) => {
     let users = snapshot.val()
-
+    console.log(users)
+    if (!users[u1]) {
+      res.status(400).send(`${query.user1} username is invalid`);
+      return;
+    }
+    console.log(users["Yister"]);
+    if (!users[u2]) {
+      res.status(400).send(`${query.user2} username is invalid`);
+      return;
+    }
+    const user1 = users[u1];
+    const user2 = users[u2];
+    const min1 = user1.priceRange && typeof user1.priceRange[0] == "string" ? parseInt(user1.priceRange[0]) : 0
+    const min2 = user2.priceRange && typeof user2.priceRange[0] == "string" ? parseInt(user2.priceRange[0]) : 0
+    const max1 = user1.priceRange && typeof user1.priceRange[1] == "string" ? parseInt(user1.priceRange[1]) : Infinity
+    const max2 = user2.priceRange && typeof user2.priceRange[1] == "string" ? parseInt(user2.priceRange[1]) : Infinity
+    const min = Math.max(min1, min2)
+    const max = Math.min(max1, max2)
+    // get affordable seats
+    const affordableSeats = generatedSeats.available.filter((seat) => {
+      return seat.price >= min && seat.price <= max
+    })
+    // find pairs of seats
+    let pairs: {row: number, seat: string, type: string, class: string, price: number}[][] = [];
+    for (let i = 0; i < affordableSeats.length - 1; i++) {
+      if (affordableSeats[i].row == affordableSeats[i+1].row &&
+        Math.abs(seatToNum(affordableSeats[i].seat) - seatToNum(affordableSeats[i+1].seat)) == 1) {
+          pairs.push([affordableSeats[i], affordableSeats[i+1]])
+        }
+    }
+    res.json(pairs);
   }).catch((error) => {console.error(error)});
-  // if (!user1) {
-  //   res.status(400).send(`${query.user1} username is invalid`);
-  //   return;
-  // }
-  // if (!user2) {
-  //   res.status(400).send(`${query.user2} username is invalid`);
-  //   return;
-  // }
-  // const min1 = user1.priceRange && typeof user1.priceRange == "string" ? parseInt(priceMin) : 0
-  // const max1 = priceMax && typeof priceMax == "string" ? parseInt(priceMax) : Infinity
-  // // get affordable seats
-  // const affordableSeats = generatedSeats.available.filter((seat) => {
-  //   return seat.price >= min && seat.price <= max
-  // })
-  // // find pairs of seats
-  // let pairs: {row: number, seat: string, type: string, class: string, price: number}[][] = [];
-  // for (let i = 0; i < affordableSeats.length - 1; i++) {
-  //   if (affordableSeats[i].row == affordableSeats[i+1].row &&
-  //     Math.abs(seatToNum(affordableSeats[i].seat) - seatToNum(affordableSeats[i+1].seat)) == 1) {
-  //       pairs.push([affordableSeats[i], affordableSeats[i+1]])
-  //     }
-  // }
-
-  res.json(generatedSeats);
+  
 })
 
 

@@ -14,7 +14,8 @@ const app = express();
 
 // firebase set up
 const admin = require("firebase-admin");
-var serviceAccount = require("./travel-buddy-7df44-firebase-adminsdk-daz2j-9d4c3116d6.json");
+const serviceAccount = require("./travel-buddy-7df44-firebase-adminsdk-daz2j-9d4c3116d6.json");
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://travel-buddy-7df44-default-rtdb.firebaseio.com"

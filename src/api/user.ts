@@ -28,7 +28,7 @@ user.get('/add', (req, res) => {
   }
 
   const {username} = query;
-  set(ref(db, 'users/' + username), {
+  set(ref(db, `users/${  username}`), {
       name: query.name,
       age: query.age,
       gender: query.gender,
