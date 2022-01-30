@@ -30,7 +30,6 @@ seats.get('/rec', (req, res) => {
       res.status(400).send(`${query.user1} username is invalid`);
       return;
     }
-    console.log(users["Yister"]);
     if (!users[u2]) {
       res.status(400).send(`${query.user2} username is invalid`);
       return;
@@ -55,7 +54,7 @@ seats.get('/rec', (req, res) => {
           pairs.push([affordableSeats[i], affordableSeats[i+1]])
         }
     }
-    res.json(pairs);
+    res.json({pairs: pairs});
   }).catch((error) => {console.error(error)});
   
 })
