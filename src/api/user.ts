@@ -85,6 +85,18 @@ user.get('/setPrefs', (req, res) => {
   res.json({message: "Preferences Added Successfully"});
 });
 
+user.get('/setFlightPrefs', (req, res) => {
+  const { query } = req;
+  if (!query || !query.user) {
+    res.status(400).send(`'user' is a required parameter`);
+    return;
+  }
+
+  const {user} = query;
+  set(ref(db, `users/${user}/flights/${query.flight}/destPlans`), query.destPlans);
+  res.json({message: "Preferences Added Successfully"});
+});
+
 user.get('/match', (req, res) => {
   const { query } = req;
   if (!query || (!query.user || typeof query.user != "string")) {
