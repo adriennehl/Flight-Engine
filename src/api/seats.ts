@@ -1,6 +1,9 @@
 import { Router } from 'express';
+import { child, get, ref } from "firebase/database";
+import { db } from "../index";
 
 export const seats = Router();
+
 seats.get('/', (req, res) => {
   const { query } = req;
   if (!query || !query.flightNumber) {
@@ -14,24 +17,43 @@ seats.get('/', (req, res) => {
 
 seats.get('/rec', (req, res) => {
   const { query } = req;
-  const { priceMin, priceMax, preferences} = query;
-  const min = priceMin && typeof priceMin == "string" ? parseInt(priceMin) : 0
-  const max = priceMax && typeof priceMax == "string" ? parseInt(priceMax) : Infinity
-  // get affordable seats
-  const affordableSeats = generatedSeats.available.filter((seat) => {
-    return seat.price >= min && seat.price <= max
-  })
-  // find pairs of seats
-  let pairs: {row: number, seat: string, type: string, class: string, price: number}[][] = [];
-  for (let i = 0; i < affordableSeats.length - 1; i++) {
-    if (affordableSeats[i].row == affordableSeats[i+1].row &&
-      Math.abs(seatToNum(affordableSeats[i].seat) - seatToNum(affordableSeats[i+1].seat)) == 1) {
-        pairs.push([affordableSeats[i], affordableSeats[i+1]])
-      }
+  if (!query || !query.user1 || !query.user2) {
+    res.status(400).send(`Two users required`);
+    return;
   }
 
-  res.json(pairs.slice(0,5));
+  let user1:{priceRange:string[]}, user2:{priceRange:string[]};
+  get(child(ref(db), `users`)).then((snapshot) => {
+    let users = snapshot.val()
+
+  }).catch((error) => {console.error(error)});
+  // if (!user1) {
+  //   res.status(400).send(`${query.user1} username is invalid`);
+  //   return;
+  // }
+  // if (!user2) {
+  //   res.status(400).send(`${query.user2} username is invalid`);
+  //   return;
+  // }
+  // const min1 = user1.priceRange && typeof user1.priceRange == "string" ? parseInt(priceMin) : 0
+  // const max1 = priceMax && typeof priceMax == "string" ? parseInt(priceMax) : Infinity
+  // // get affordable seats
+  // const affordableSeats = generatedSeats.available.filter((seat) => {
+  //   return seat.price >= min && seat.price <= max
+  // })
+  // // find pairs of seats
+  // let pairs: {row: number, seat: string, type: string, class: string, price: number}[][] = [];
+  // for (let i = 0; i < affordableSeats.length - 1; i++) {
+  //   if (affordableSeats[i].row == affordableSeats[i+1].row &&
+  //     Math.abs(seatToNum(affordableSeats[i].seat) - seatToNum(affordableSeats[i+1].seat)) == 1) {
+  //       pairs.push([affordableSeats[i], affordableSeats[i+1]])
+  //     }
+  // }
+
+  res.json(generatedSeats);
 })
+
+
 
 const seatToNum = (seat: string) => {
   if (seat == "A") return 1; 
